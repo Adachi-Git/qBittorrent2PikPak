@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # qBittorrent2PikPak
 
 qBittorrent2PikPak 是一个用于将种子文件转换为 PikPak 下载任务的自动化工具。
@@ -55,6 +54,3 @@ qBittorrent2PikPak 是一个用于将种子文件转换为 PikPak 下载任务�
 ## 许可证
 
 本项目采用 [MIT 许可证](LICENSE)。
-=======
-# qBittorrent2PikPak
->>>>>>> 4447ac1cd2f3845648e08d875c81c26d47ee07f4
