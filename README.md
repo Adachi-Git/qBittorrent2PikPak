@@ -6,8 +6,8 @@ qBittorrent2PikPak 是一个用于将种子文件转换为 PikPak 下载任务�
 
 ## 功能
 
-- 从指定的来源获取种子文件信息
-- 使用 PikPak API 下载种子文件
+- 从下载列表获取种子文件信息[可自行修改 get_torrent_list.py 调整种子来源]
+- 使用 PikPak API 离线下载种子文件
 
 ## 安装
 
