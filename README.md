@@ -26,17 +26,7 @@ qBittorrent2PikPak 是一个用于将种子文件转换为 PikPak 下载任务�
 
 ## 配置
 
-1. 在 `config.json` 文件中填写您的 PikPak 和其他相关信息：
-
-    ```json
-    {
-        "pikpak_username": "your_pikpak_username",
-        "pikpak_password": "your_pikpak_password",
-        "proxy": "http://127.0.0.1:port",
-        "source_url": "https://example.com/source",
-        "download_directory": "/path/to/download/directory"
-    }
-    ```
+1. 在 `config.json` 文件中填写您的 PikPak 和其他相关信息
 
 2. 运行 `main.py` 开始运行项目：
 
