@@ -2,7 +2,7 @@
 
 qBittorrent2PikPak 是一个用于将种子文件转换为 PikPak 下载任务的自动化工具。
 
-目前发送磁链时会发送tracker和key，PT用户慎用，小心封号。
+目前发送磁链时会发送tracker和key，能用懒得改了，PT用户慎用，小心封号。
 
 ## 功能
 
