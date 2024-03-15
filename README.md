@@ -6,8 +6,8 @@ qBittorrent2PikPak 是一个用于将种子链接发送到 PikPak 下载任务�
 
 ## 功能
 
-- 从下载列表获取种子文件信息[可自行修改 get_torrent_list.py 调整种子来源]
-- 使用 PikPak API 离线下载种子文件
+- 从状态为 下载 的列表中获取种子信息[可自行修改 get_torrent_list.py 调整种子来源]
+- 使用 PikPak API 离线下载种子
 
 ## 安装
 
