@@ -24,15 +24,17 @@ qBittorrent2PikPak 是一个用于将种子链接发送到 PikPak 下载任务�
     pip install -r requirements.txt
     ```
 
-## 配置
+## 使用
 
 1. 在 `config.json` 文件中填写您的 PikPak 和其他相关信息
+2. 自行使用 qBittorrent 自带的从RSS下载功能，取消自动开始下载，即把下载任务存放在“下载”状态，脚本执行会从下载列表获取磁链[可自行修改 get_torrent_list.py 调整种子来源]
 
-2. 运行 `main.py` 开始运行项目：
+3. 运行 `main.py` 开始运行项目：
 
     ```bash
     python main.py
     ```
+   
 
 ## 注意事项
 
