@@ -2,8 +2,6 @@
 
 qBittorrent2PikPak 是一个用于将种子链接发送到 PikPak 下载任务的自动化工具。
 
-目前发送磁链时会发送tracker和key，能用懒得改了，PT用户慎用，小心封号。
-
 ## 功能
 
 - 从状态为 下载 的列表中获取种子信息[可自行修改 get_torrent_list.py 调整种子来源]
@@ -27,7 +25,7 @@ qBittorrent2PikPak 是一个用于将种子链接发送到 PikPak 下载任务�
 ## 使用
 
 1. 在 `config.json` 文件中填写您的 PikPak 和其他相关信息
-2. 自行使用 qBittorrent 自带的从RSS下载功能，取消自动开始下载，即把下载任务存放在“下载”状态，脚本执行会从下载列表获取磁链[可自行修改 get_torrent_list.py 调整种子来源]
+2. 自行打开 qBittorrent 设置中的的 Web UI 功能，自行使用 qBittorrent 自带的从RSS下载功能，取消自动开始下载，即把下载任务存放在“下载”状态，脚本执行会从下载列表获取磁链[可自行修改 get_torrent_list.py 调整种子来源]
 
 3. 运行 `main.py` 开始运行项目：
 
