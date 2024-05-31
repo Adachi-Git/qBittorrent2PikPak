@@ -1,5 +1,6 @@
 import json
 import requests
+import re
 
 def login_and_get_torrent_list(config_file):
     def login_qbittorrent(qbittorrent_username, qbittorrent_password, url):
@@ -67,9 +68,11 @@ def login_and_get_torrent_list(config_file):
     if downloading_torrent_list:
         result = []
         for torrent in downloading_torrent_list:
+            magnet_link = torrent['magnet_uri']
+            simplified_magnet_link = re.sub(r'&dn=.*', '', magnet_link)  # 移除 &dn= 及其后的内容
             torrent_info = {
                 "name": torrent['name'],
-                "magnet_link": torrent['magnet_uri'],
+                "magnet_link": simplified_magnet_link,
                 "hash": torrent['hash']
             }
             result.append(torrent_info)
