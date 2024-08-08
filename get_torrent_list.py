@@ -53,8 +53,8 @@ def login_and_get_torrent_list(config_file):
         print("Config file not found.")
         return
     
-    username = config.get('username')
-    password = config.get('password')
+    username = config.get('qbittorrent_username')
+    password = config.get('qbittorrent_password')
     qb_url = config.get('qb_url')
     
     # 登录到 qBittorrent
