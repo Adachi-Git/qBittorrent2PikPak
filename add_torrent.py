@@ -11,14 +11,18 @@ async def download_from_config():
         pikpak_password = config["pikpak_password"]
         proxy = config.get("proxy")
 
+    # 创建 httpx_client_args 并添加代理设置（如果有的话）
+    httpx_client_args = {
+        "transport": httpx.AsyncHTTPTransport(retries=3),
+    }
+    if proxy:
+        httpx_client_args["proxy"] = proxy
+
     # 创建 PikPakApi 实例并登录
     client = PikPakApi(
         username=pikpak_username,
         password=pikpak_password,
-        httpx_client_args={
-            "proxy": proxy,
-            "transport": httpx.AsyncHTTPTransport(retries=3),
-        },
+        httpx_client_args=httpx_client_args,
     )
     await client.login()
 
