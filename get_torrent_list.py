@@ -19,7 +19,7 @@ def login_and_get_torrent_list(config_file):
             print("An error occurred:", e)
             return None
     
-    def get_torrent_list(session_id, url, state='downloading', category=None, tag=None, sort=None, reverse=False, limit=None, offset=None, hashes=None):
+    def get_torrent_list(session_id, url, state, category=None, tag=None, sort=None, reverse=False, limit=None, offset=None, hashes=None):
         torrent_list_url = f"{url}/api/v2/torrents/info"
         params = {
             'filter': state,
@@ -45,7 +45,7 @@ def login_and_get_torrent_list(config_file):
             print("An error occurred:", e)
             return None
     
-    # 从配置文件中读取用户名、密码和 qbittorrent URL
+    # 从配置文件中读取参数
     try:
         with open(config_file, 'r') as f:
             config = json.load(f)
@@ -56,6 +56,7 @@ def login_and_get_torrent_list(config_file):
     username = config.get('qbittorrent_username')
     password = config.get('qbittorrent_password')
     qb_url = config.get('qb_url')
+    state = config.get('state', 'downloading')  # 从配置文件中读取state参数，如果没有设置默认值为'downloading'
     
     # 登录到 qBittorrent
     session_id = login_qbittorrent(username, password, qb_url)
@@ -63,11 +64,11 @@ def login_and_get_torrent_list(config_file):
         print("Login failed.")
         return
     
-    # 获取下载中的种子列表
-    downloading_torrent_list = get_torrent_list(session_id, qb_url, state='downloading')
-    if downloading_torrent_list:
+    # 获取指定状态的种子列表
+    torrent_list = get_torrent_list(session_id, qb_url, state=state)
+    if torrent_list:
         result = []
-        for torrent in downloading_torrent_list:
+        for torrent in torrent_list:
             magnet_link = torrent['magnet_uri']
             simplified_magnet_link = re.sub(r'&dn=.*', '', magnet_link)  # 移除 &dn= 及其后的内容
             torrent_info = {
@@ -77,10 +78,13 @@ def login_and_get_torrent_list(config_file):
             }
             result.append(torrent_info)
         
-        # 将哈希值保存到 hash.json 文件中
+        # 将结果保存到hash.json文件中
         with open('hash.json', 'w') as hash_file:
             json.dump(result, hash_file, indent=4)
         
-        print("Downloading torrents saved to hash.json.")
+        print(f"Torrents with state '{state}' saved to hash.json.")
     else:
-        print("Failed to get downloading torrent list.")
+        print(f"Failed to get torrent list with state '{state}'.")
+
+# 调用函数
+login_and_get_torrent_list('config.json')
