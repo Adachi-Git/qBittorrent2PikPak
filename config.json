@@ -4,5 +4,5 @@
     "qb_url": "http://localhost:8080",
     "pikpak_username": "",
     "pikpak_password": "",
-    "proxy": "http://127.0.0.1:30001"
+    "proxy": ""
 }
