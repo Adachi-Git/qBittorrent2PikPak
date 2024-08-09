@@ -1,8 +1,9 @@
 {
-    "qbittorrent_username": "your_username",
-    "qbittorrent_password": "your_password",
+    "qbittorrent_username": "admin",
+    "qbittorrent_password": "adminadmin",
     "qb_url": "http://localhost:8080",
     "pikpak_username": "",
     "pikpak_password": "",
+    "state": "downloading",
     "proxy": ""
 }
