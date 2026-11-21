@@ -20,3 +20,4 @@ Thumbs.db
 
 # 本地配置（含账号密码，勿提交）
 config.json
+pikpak_token.json
