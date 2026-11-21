@@ -1,43 +1,77 @@
 import asyncio
 import json
+import os
 import httpx
 from pikpakapi import PikPakApi, PikpakException
 
-async def download_from_config():
-    # 从配置文件中加载用户名、密码和代理位置
-    with open('config.json', 'r', encoding='utf-8') as f:
-        config = json.load(f)
-        pikpak_username = config["pikpak_username"]
-        pikpak_password = config["pikpak_password"]
-        proxy = config.get("proxy")
+TOKEN_FILE = "pikpak_token.json"
 
-    # 创建 httpx_client_args 并添加代理设置（如果有的话）
+
+def load_encoded_token():
+    try:
+        with open(TOKEN_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get("encoded_token")
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
+
+
+def save_encoded_token(client):
+    token = getattr(client, "encoded_token", None)
+    if token:
+        with open(TOKEN_FILE, 'w', encoding='utf-8') as f:
+            json.dump({"encoded_token": token}, f)
+
+
+async def build_client(config):
+    pikpak_username = config["pikpak_username"]
+    pikpak_password = config["pikpak_password"]
+    proxy = config.get("proxy")
+
     httpx_client_args = {
         "transport": httpx.AsyncHTTPTransport(retries=3),
     }
     if proxy:
         httpx_client_args["proxy"] = proxy
 
-    # 创建 PikPakApi 实例并登录
+    encoded_token = load_encoded_token()
+
+    # 有缓存 token：尝试刷新，失败则回退到登录
+    if encoded_token:
+        client = PikPakApi(encoded_token=encoded_token, httpx_client_args=httpx_client_args)
+        try:
+            await client.refresh_access_token()
+            save_encoded_token(client)
+            return client
+        except Exception:
+            pass  # 刷新失败，走下面的登录流程
+
+    # 无 token 或刷新失败：用账号密码登录
     client = PikPakApi(
         username=pikpak_username,
         password=pikpak_password,
         httpx_client_args=httpx_client_args,
     )
     await client.login()
+    save_encoded_token(client)
+    return client
 
-    # 从 JSON 文件中加载数据
+
+async def download_from_config():
+    with open('config.json', 'r', encoding='utf-8') as f:
+        config = json.load(f)
+
+    client = await build_client(config)
+
     with open('hash.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    # 加载已下载的磁力链接
     try:
         with open('downloaded_hashes.json', 'r', encoding='utf-8') as f:
             downloaded_hashes = json.load(f)
     except FileNotFoundError:
         downloaded_hashes = []
 
-    # 提取磁力链接并进行下载
     for item in data:
         magnet_link = item['magnet_link']
         if magnet_link in downloaded_hashes:
@@ -48,16 +82,15 @@ async def download_from_config():
         try:
             result = await client.offline_download(magnet_link)
             print("Download result:", result)
-            # 只有在成功下载后才将磁力链接添加到已下载的列表中
             downloaded_hashes.append(magnet_link)
         except PikpakException as e:
             print(f"Failed to download magnet link: {magnet_link}. Error: {e}")
         finally:
             print("=" * 30, end="\n\n")
 
-    # 将已下载的磁力链接保存到文件中（只包含成功下载的）
     with open('downloaded_hashes.json', 'w', encoding='utf-8') as f:
         json.dump(downloaded_hashes, f, indent=4)
+
 
 if __name__ == "__main__":
     asyncio.run(download_from_config())
