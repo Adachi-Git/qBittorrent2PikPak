@@ -1,3 +1,2 @@
 httpx==0.26.0
-pikpakapi==0.1.11
 Requests==2.31.0
