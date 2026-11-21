@@ -1,67 +1,41 @@
 import asyncio
 import json
-import os
 import httpx
-from pikpakapi import PikPakApi, PikpakException
 
-TOKEN_FILE = "pikpak_token.json"
-
-
-def load_encoded_token():
-    try:
-        with open(TOKEN_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            return data.get("encoded_token")
-    except (FileNotFoundError, json.JSONDecodeError):
-        return None
+API_URL = "https://api-drive.mypikpak.com/drive/v1/files"
 
 
-def save_encoded_token(client):
-    token = getattr(client, "encoded_token", None)
-    if token:
-        with open(TOKEN_FILE, 'w', encoding='utf-8') as f:
-            json.dump({"encoded_token": token}, f)
+def load_config():
+    with open('config.json', 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 
-async def build_client(config):
-    pikpak_username = config["pikpak_username"]
-    pikpak_password = config["pikpak_password"]
-    proxy = config.get("proxy")
-
-    httpx_client_args = {
-        "transport": httpx.AsyncHTTPTransport(retries=3),
+async def offline_download(client, pat, magnet_link):
+    headers = {
+        "Authorization": "Bearer " + pat,
+        "Content-Type": "application/json",
+        "User-Agent": "pikpak-cli/1.0.0",
     }
-    if proxy:
-        httpx_client_args["proxy"] = proxy
-
-    encoded_token = load_encoded_token()
-
-    # 有缓存 token：尝试刷新，失败则回退到登录
-    if encoded_token:
-        client = PikPakApi(encoded_token=encoded_token, httpx_client_args=httpx_client_args)
-        try:
-            await client.refresh_access_token()
-            save_encoded_token(client)
-            return client
-        except Exception:
-            pass  # 刷新失败，走下面的登录流程
-
-    # 无 token 或刷新失败：用账号密码登录
-    client = PikPakApi(
-        username=pikpak_username,
-        password=pikpak_password,
-        httpx_client_args=httpx_client_args,
-    )
-    await client.login()
-    save_encoded_token(client)
-    return client
+    data = {
+        "kind": "drive#file",
+        "upload_type": "UPLOAD_TYPE_URL",
+        "url": {"url": magnet_link},
+        "folder_type": "DOWNLOAD",
+    }
+    resp = await client.post(API_URL, json=data, headers=headers)
+    if resp.status_code == 200:
+        return resp.json()
+    raise Exception(f"offline download failed: {resp.status_code} {resp.text[:200]}")
 
 
 async def download_from_config():
-    with open('config.json', 'r', encoding='utf-8') as f:
-        config = json.load(f)
+    config = load_config()
+    pat = config["pikpak_access_token"]
+    proxy = config.get("proxy")
 
-    client = await build_client(config)
+    client_args = {}
+    if proxy:
+        client_args["proxy"] = proxy
 
     with open('hash.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -72,21 +46,22 @@ async def download_from_config():
     except FileNotFoundError:
         downloaded_hashes = []
 
-    for item in data:
-        magnet_link = item['magnet_link']
-        if magnet_link in downloaded_hashes:
-            print("Skipping already downloaded magnet link:", magnet_link)
-            continue
+    async with httpx.AsyncClient(**client_args) as client:
+        for item in data:
+            magnet_link = item['magnet_link']
+            if magnet_link in downloaded_hashes:
+                print("Skipping already downloaded magnet link:", magnet_link)
+                continue
 
-        print("Downloading from magnet link:", magnet_link)
-        try:
-            result = await client.offline_download(magnet_link)
-            print("Download result:", result)
-            downloaded_hashes.append(magnet_link)
-        except PikpakException as e:
-            print(f"Failed to download magnet link: {magnet_link}. Error: {e}")
-        finally:
-            print("=" * 30, end="\n\n")
+            print("Downloading from magnet link:", magnet_link)
+            try:
+                result = await offline_download(client, pat, magnet_link)
+                print("Download result:", result)
+                downloaded_hashes.append(magnet_link)
+            except Exception as e:
+                print(f"Failed to download magnet link: {magnet_link}. Error: {e}")
+            finally:
+                print("=" * 30, end="\n\n")
 
     with open('downloaded_hashes.json', 'w', encoding='utf-8') as f:
         json.dump(downloaded_hashes, f, indent=4)
