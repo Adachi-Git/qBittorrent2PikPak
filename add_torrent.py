@@ -43,7 +43,7 @@ async def download_from_config():
         if magnet_link in downloaded_hashes:
             print("Skipping already downloaded magnet link:", magnet_link)
             continue
-        
+
         print("Downloading from magnet link:", magnet_link)
         try:
             result = await client.offline_download(magnet_link)
