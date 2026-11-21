@@ -82,4 +82,5 @@ def login_and_get_torrent_list(config_file):
     else:
         print(f"Failed to get torrent list with state '{state}'.")
 
-login_and_get_torrent_list('config.json')
+if __name__ == "__main__":
+    login_and_get_torrent_list('config.json')
